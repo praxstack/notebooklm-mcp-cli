@@ -390,7 +390,6 @@ def find_existing_nlm_chrome(
     Returns:
         The port number and debugger URL if found, (None, None) otherwise
     """
-    import socket
 
     port_map = _read_port_map()
 

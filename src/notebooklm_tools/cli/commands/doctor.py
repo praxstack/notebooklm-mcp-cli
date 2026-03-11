@@ -1,12 +1,11 @@
 """Diagnostic command for troubleshooting NotebookLM MCP setup."""
 
-import shutil
 import platform
+import shutil
 from pathlib import Path
 
 import typer
 from rich.console import Console
-from rich.table import Table
 
 console = Console()
 app = typer.Typer(
@@ -65,7 +64,7 @@ def _check_installation(verbose: bool) -> bool:
         from notebooklm_tools import __version__
         console.print(f"  notebooklm-mcp-cli: [green]{__version__}[/green]")
     except ImportError:
-        console.print(f"  notebooklm-mcp-cli: [red]not importable[/red]")
+        console.print("  notebooklm-mcp-cli: [red]not importable[/red]")
         ok = False
 
     # Binary paths
@@ -99,8 +98,8 @@ def _check_authentication(verbose: bool) -> bool:
     profiles = AuthManager.list_profiles()
 
     if not profiles:
-        console.print(f"  Profiles: [red]none[/red]")
-        console.print(f"  [yellow]→[/yellow] Run [cyan]nlm login[/cyan] to authenticate")
+        console.print("  Profiles: [red]none[/red]")
+        console.print("  [yellow]→[/yellow] Run [cyan]nlm login[/cyan] to authenticate")
         return False
 
     console.print(f"  Default profile: [cyan]{default_profile}[/cyan]")
@@ -119,7 +118,7 @@ def _check_authentication(verbose: bool) -> bool:
             if has_cookies:
                 console.print(f"  Cookies: [green]present[/green] ({len(profile.cookies)} cookies)")
             else:
-                console.print(f"  Cookies: [red]missing[/red]")
+                console.print("  Cookies: [red]missing[/red]")
                 ok = False
 
             console.print(f"  CSRF token: {'[green]yes[/green]' if has_csrf else '[yellow]no[/yellow] (will auto-extract)'}")
@@ -132,7 +131,7 @@ def _check_authentication(verbose: bool) -> bool:
                     console.print(f"  Last validated: [dim]{last_validated}[/dim]")
         else:
             console.print(f"  Profile '{default_profile}': [red]not found[/red]")
-            console.print(f"  [yellow]→[/yellow] Run [cyan]nlm login[/cyan] to create it")
+            console.print("  [yellow]→[/yellow] Run [cyan]nlm login[/cyan] to create it")
             ok = False
     except Exception as e:
         console.print(f"  Profile '{default_profile}': [red]error loading[/red] ({e})")
@@ -162,12 +161,12 @@ def _check_chrome(verbose: bool) -> bool:
         chrome_path = Path(shutil.which("google-chrome") or shutil.which("chromium") or "")
 
     if chrome_path.exists():
-        console.print(f"  Chrome: [green]installed[/green]")
+        console.print("  Chrome: [green]installed[/green]")
         if verbose:
             console.print(f"  [dim]{chrome_path}[/dim]")
     else:
-        console.print(f"  Chrome: [red]not found[/red]")
-        console.print(f"  [yellow]→[/yellow] Chrome is required for authentication")
+        console.print("  Chrome: [red]not found[/red]")
+        console.print("  [yellow]→[/yellow] Chrome is required for authentication")
         ok = False
 
     # Saved Chrome profile
@@ -192,10 +191,10 @@ def _check_chrome(verbose: bool) -> bool:
             console.print(f"  Legacy profile: [dim]{legacy_chrome}[/dim]")
 
     if has_profile:
-        console.print(f"  Headless auth: [green]available[/green] (saved Google login)")
+        console.print("  Headless auth: [green]available[/green] (saved Google login)")
     else:
-        console.print(f"  Headless auth: [yellow]not available[/yellow] (no saved profile)")
-        console.print(f"  [dim]Run nlm login once to save Chrome profile for headless refresh[/dim]")
+        console.print("  Headless auth: [yellow]not available[/yellow] (no saved profile)")
+        console.print("  [dim]Run nlm login once to save Chrome profile for headless refresh[/dim]")
 
     return ok
 
@@ -205,16 +204,16 @@ def _check_clients(verbose: bool) -> bool:
     console.print("[bold]AI Tool Configurations[/bold]")
 
     # Import setup module for config detection
+    import subprocess
+
     from notebooklm_tools.cli.commands.setup import (
         CLIENT_REGISTRY,
-        _gemini_config_path,
         _cursor_config_path,
-        _windsurf_config_path,
-        _read_json_config,
+        _gemini_config_path,
         _is_configured,
+        _read_json_config,
+        _windsurf_config_path,
     )
-
-    import subprocess
 
     configured_count = 0
     total_count = 0
@@ -268,8 +267,8 @@ def _check_clients(verbose: bool) -> bool:
         # None means we couldn't determine (already printed)
 
     if configured_count == 0:
-        console.print(f"\n  [yellow]No AI tools configured.[/yellow]")
-        console.print(f"  Run [cyan]nlm setup add <client>[/cyan] to configure one.")
+        console.print("\n  [yellow]No AI tools configured.[/yellow]")
+        console.print("  Run [cyan]nlm setup add <client>[/cyan] to configure one.")
         return False
 
     return True
