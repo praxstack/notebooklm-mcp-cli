@@ -23,7 +23,7 @@ def pipeline_run(
     input_url: str = typer.Option("", "--input-url", "-u", help="URL variable ($INPUT_URL)"),
 ) -> None:
     """Execute a pipeline on a notebook."""
-    from notebooklm_tools.cli.utils import get_client
+    from notebooklm_tools.cli.utils import get_client, handle_error
 
     try:
         client = get_client()

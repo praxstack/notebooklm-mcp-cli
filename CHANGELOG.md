@@ -5,7 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.5.2] - 2026-03-19
+## [0.5.3] - 2026-03-22
+
+### Improved
+- **Actionable Error Hints Across CLI & MCP (Issue #103)** — All CLI commands and MCP tools now provide structured, user-friendly error messages with actionable hints (e.g., "Run 'nlm login' to authenticate" or "Run 'nlm notebook list' to see available notebooks"). Thanks to **@ahnbu** for suggesting this improvement!
+  - **CLI**: Consolidated error handling via centralized `handle_error()` across all 13 command modules. Errors with `--json` flag now output structured JSON (`{"status": "error", "error": "...", "hint": "..."}`).
+  - **MCP**: All 27 MCP tools now include `hint` fields in error responses for AI agent consumption.
+  - **Services**: `ServiceError` now carries an optional `hint` attribute, propagated from `NLMError` exceptions.
+  - **Core**: `NotebookLMError` (parent of `RPCError`, `ArtifactError`, etc.) now inherits from `NLMError`, ensuring all low-level API errors are caught and handled gracefully instead of producing raw tracebacks.
 
 ### Fixed
 - **Non-ASCII characters in JSON output (PR #100)** — CLI JSON output (`--json` flag) now preserves Unicode characters (e.g., `café`, `こんにちは`) instead of escaping them as `\uXXXX` sequences via a shared `print_json()` helper with `ensure_ascii=False`. Thanks to **@nickyfoto** for the contribution. (PR #100)

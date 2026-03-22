@@ -7,7 +7,7 @@ from rich.console import Console
 
 from notebooklm_tools.core.alias import get_alias_manager
 from notebooklm_tools.core.exceptions import NLMError
-from notebooklm_tools.cli.utils import get_client
+from notebooklm_tools.cli.utils import get_client, handle_error
 from notebooklm_tools.services import exports as export_service, ServiceError
 
 console = Console()
@@ -58,14 +58,8 @@ def export_artifact(
         console.print(f"[green]✓[/green] {result['message']}")
         console.print(f"[bold]URL:[/bold] {result['url']}")
 
-    except ServiceError as e:
-        console.print(f"[red]Error:[/red] {e.user_message}")
-        raise typer.Exit(1)
-    except NLMError as e:
-        console.print(f"[red]Error:[/red] {e.message}")
-        if e.hint:
-            console.print(f"\n[dim]Hint: {e.hint}[/dim]")
-        raise typer.Exit(1)
+    except (ServiceError, NLMError) as e:
+        handle_error(e, json_output=locals().get('json_output', False))
 
 
 @app.command("to-docs")
@@ -99,14 +93,8 @@ def export_to_docs(
         console.print(f"[green]✓[/green] {result['message']}")
         console.print(f"[bold]URL:[/bold] {result['url']}")
 
-    except ServiceError as e:
-        console.print(f"[red]Error:[/red] {e.user_message}")
-        raise typer.Exit(1)
-    except NLMError as e:
-        console.print(f"[red]Error:[/red] {e.message}")
-        if e.hint:
-            console.print(f"\n[dim]Hint: {e.hint}[/dim]")
-        raise typer.Exit(1)
+    except (ServiceError, NLMError) as e:
+        handle_error(e, json_output=locals().get('json_output', False))
 
 
 @app.command("to-sheets")
@@ -138,11 +126,5 @@ def export_to_sheets(
         console.print(f"[green]✓[/green] {result['message']}")
         console.print(f"[bold]URL:[/bold] {result['url']}")
 
-    except ServiceError as e:
-        console.print(f"[red]Error:[/red] {e.user_message}")
-        raise typer.Exit(1)
-    except NLMError as e:
-        console.print(f"[red]Error:[/red] {e.message}")
-        if e.hint:
-            console.print(f"\n[dim]Hint: {e.hint}[/dim]")
-        raise typer.Exit(1)
+    except (ServiceError, NLMError) as e:
+        handle_error(e, json_output=locals().get('json_output', False))

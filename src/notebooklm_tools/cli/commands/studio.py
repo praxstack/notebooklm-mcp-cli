@@ -9,7 +9,7 @@ from rich.progress import Progress, SpinnerColumn, TextColumn
 from notebooklm_tools.core.alias import get_alias_manager
 from notebooklm_tools.core.exceptions import NLMError
 from notebooklm_tools.cli.formatters import detect_output_format, get_formatter
-from notebooklm_tools.cli.utils import get_client
+from notebooklm_tools.cli.utils import get_client, handle_error
 from notebooklm_tools.services import studio as studio_service, ServiceError, ValidationError
 from notebooklm_tools.utils.config import get_default_language
 
@@ -120,11 +120,8 @@ def _run_create(
         if isinstance(e, ServiceError) and "rejected" in str(e):
             console.print("[dim]Try again later or create from NotebookLM UI for diagnosis.[/dim]")
         raise typer.Exit(1)
-    except NLMError as e:
-        console.print(f"[red]Error:[/red] {e.message}")
-        if e.hint:
-            console.print(f"\n[dim]Hint: {e.hint}[/dim]")
-        raise typer.Exit(1)
+    except (ServiceError, NLMError) as e:
+        handle_error(e, json_output=locals().get('json_output', False))
 
 
 # ========== Studio Status/Delete ==========
@@ -145,11 +142,8 @@ def studio_status(
         fmt = detect_output_format(json_output)
         formatter = get_formatter(fmt, console)
         formatter.format_artifacts(artifacts, full=full)
-    except NLMError as e:
-        console.print(f"[red]Error:[/red] {e.message}")
-        if e.hint:
-            console.print(f"\n[dim]Hint: {e.hint}[/dim]")
-        raise typer.Exit(1)
+    except (ServiceError, NLMError) as e:
+        handle_error(e, json_output=locals().get('json_output', False))
 
 
 @app.command("delete")
@@ -170,14 +164,8 @@ def studio_delete(
         with get_client(profile) as client:
             studio_service.delete_artifact(client, artifact_id, notebook_id)
         console.print(f"[green]✓[/green] Deleted artifact: {artifact_id}")
-    except ServiceError as e:
-        console.print(f"[red]Error:[/red] {e.user_message}")
-        raise typer.Exit(1)
-    except NLMError as e:
-        console.print(f"[red]Error:[/red] {e.message}")
-        if e.hint:
-            console.print(f"\n[dim]Hint: {e.hint}[/dim]")
-        raise typer.Exit(1)
+    except (ServiceError, NLMError) as e:
+        handle_error(e, json_output=locals().get('json_output', False))
 
 
 @app.command("rename")
@@ -197,11 +185,8 @@ def studio_rename(
         msg = e.user_message if isinstance(e, ServiceError) else str(e)
         console.print(f"[red]Error:[/red] {msg}")
         raise typer.Exit(1)
-    except NLMError as e:
-        console.print(f"[red]Error:[/red] {e.message}")
-        if e.hint:
-            console.print(f"\n[dim]Hint: {e.hint}[/dim]")
-        raise typer.Exit(1)
+    except (ServiceError, NLMError) as e:
+        handle_error(e, json_output=locals().get('json_output', False))
 
 
 # ========== Audio ==========
@@ -319,11 +304,8 @@ def create_quiz(
         console.print("[green]✓[/green] Quiz generation started")
         console.print(f"  Artifact ID: {result.get('artifact_id', 'unknown')}")
         console.print(f"\n[dim]Run 'nlm studio status {notebook_id_resolved}' to check progress.[/dim]")
-    except NLMError as e:
-        console.print(f"[red]Error:[/red] {e.message}")
-        if e.hint:
-            console.print(f"\n[dim]Hint: {e.hint}[/dim]")
-        raise typer.Exit(1)
+    except (ServiceError, NLMError) as e:
+        handle_error(e, json_output=locals().get('json_output', False))
 
 
 # ========== Flashcards ==========
@@ -462,11 +444,8 @@ def revise_slides(
         msg = e.user_message if isinstance(e, ServiceError) else str(e)
         console.print(f"[red]Error:[/red] {msg}")
         raise typer.Exit(1)
-    except NLMError as e:
-        console.print(f"[red]Error:[/red] {e.message}")
-        if e.hint:
-            console.print(f"\n[dim]Hint: {e.hint}[/dim]")
-        raise typer.Exit(1)
+    except (ServiceError, NLMError) as e:
+        handle_error(e, json_output=locals().get('json_output', False))
 
 
 # ========== Infographic ==========

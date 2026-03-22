@@ -169,9 +169,11 @@ def add_source(
     except (ValidationError, ServiceError):
         raise
     except Exception as e:
+        hint = "Check the URL is accessible. For YouTube, ensure the video is public." if source_type == "url" else None
         raise ServiceError(
             f"Failed to add {source_type} source: {e}",
             user_message=f"Could not add {source_type} source.",
+            hint=hint,
         )
 
     # Should never reach here due to validate_source_type above
@@ -273,6 +275,7 @@ def add_sources(
             raise ServiceError(
                 f"Failed to batch-add URL sources: {e}",
                 user_message="Could not add URL sources.",
+                hint="Check the URLs are accessible. For YouTube, ensure the videos are public."
             )
 
     # Add non-URL sources individually

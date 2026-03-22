@@ -8,7 +8,7 @@ from rich.table import Table
 
 from notebooklm_tools.core.alias import get_alias_manager
 from notebooklm_tools.core.exceptions import NLMError
-from notebooklm_tools.cli.utils import get_client
+from notebooklm_tools.cli.utils import get_client, handle_error
 from notebooklm_tools.services import sharing as sharing_service, ServiceError
 
 console = Console()
@@ -57,14 +57,8 @@ def share_status(
         else:
             console.print("\n[dim]No collaborators[/dim]")
 
-    except ServiceError as e:
-        console.print(f"[red]Error:[/red] {e.user_message}")
-        raise typer.Exit(1)
-    except NLMError as e:
-        console.print(f"[red]Error:[/red] {e.message}")
-        if e.hint:
-            console.print(f"\n[dim]Hint: {e.hint}[/dim]")
-        raise typer.Exit(1)
+    except (ServiceError, NLMError) as e:
+        handle_error(e, json_output=locals().get('json_output', False))
 
 
 @app.command("public")
@@ -81,14 +75,8 @@ def share_public(
         console.print("[green]✓[/green] Public access enabled")
         console.print(f"[bold]Link:[/bold] {result['public_link']}")
 
-    except ServiceError as e:
-        console.print(f"[red]Error:[/red] {e.user_message}")
-        raise typer.Exit(1)
-    except NLMError as e:
-        console.print(f"[red]Error:[/red] {e.message}")
-        if e.hint:
-            console.print(f"\n[dim]Hint: {e.hint}[/dim]")
-        raise typer.Exit(1)
+    except (ServiceError, NLMError) as e:
+        handle_error(e, json_output=locals().get('json_output', False))
 
 
 @app.command("private")
@@ -105,14 +93,8 @@ def share_private(
         console.print("[green]✓[/green] Public access disabled")
         console.print("[dim]Notebook is now restricted to collaborators[/dim]")
 
-    except ServiceError as e:
-        console.print(f"[red]Error:[/red] {e.user_message}")
-        raise typer.Exit(1)
-    except NLMError as e:
-        console.print(f"[red]Error:[/red] {e.message}")
-        if e.hint:
-            console.print(f"\n[dim]Hint: {e.hint}[/dim]")
-        raise typer.Exit(1)
+    except (ServiceError, NLMError) as e:
+        handle_error(e, json_output=locals().get('json_output', False))
 
 
 @app.command("invite")
@@ -130,14 +112,8 @@ def share_invite(
         
         console.print(f"[green]✓[/green] {result['message']}")
 
-    except ServiceError as e:
-        console.print(f"[red]Error:[/red] {e.user_message}")
-        raise typer.Exit(1)
-    except NLMError as e:
-        console.print(f"[red]Error:[/red] {e.message}")
-        if e.hint:
-            console.print(f"\n[dim]Hint: {e.hint}[/dim]")
-        raise typer.Exit(1)
+    except (ServiceError, NLMError) as e:
+        handle_error(e, json_output=locals().get('json_output', False))
 
 
 @app.command("batch")
@@ -177,11 +153,5 @@ def share_batch(
 
         console.print(table)
 
-    except ServiceError as e:
-        console.print(f"[red]Error:[/red] {e.user_message}")
-        raise typer.Exit(1)
-    except NLMError as e:
-        console.print(f"[red]Error:[/red] {e.message}")
-        if e.hint:
-            console.print(f"\n[dim]Hint: {e.hint}[/dim]")
-        raise typer.Exit(1)
+    except (ServiceError, NLMError) as e:
+        handle_error(e, json_output=locals().get('json_output', False))

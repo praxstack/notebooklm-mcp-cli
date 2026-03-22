@@ -43,7 +43,7 @@ def batch_query(
     all_notebooks: bool = typer.Option(False, "--all", "-a", help="Query ALL notebooks"),
 ) -> None:
     """Query multiple notebooks with the same question."""
-    from notebooklm_tools.cli.utils import get_client
+    from notebooklm_tools.cli.utils import get_client, handle_error
     from notebooklm_tools.services import batch as batch_service
 
     try:
@@ -67,7 +67,7 @@ def batch_add_source(
     all_notebooks: bool = typer.Option(False, "--all", "-a", help="Add to ALL notebooks"),
 ) -> None:
     """Add the same source URL to multiple notebooks."""
-    from notebooklm_tools.cli.utils import get_client
+    from notebooklm_tools.cli.utils import get_client, handle_error
     from notebooklm_tools.services import batch as batch_service
 
     try:
@@ -88,7 +88,7 @@ def batch_create(
     titles: str = typer.Argument(..., help="Comma-separated notebook titles"),
 ) -> None:
     """Create multiple notebooks at once."""
-    from notebooklm_tools.cli.utils import get_client
+    from notebooklm_tools.cli.utils import get_client, handle_error
     from notebooklm_tools.services import batch as batch_service
 
     try:
@@ -110,7 +110,7 @@ def batch_delete(
     confirm: bool = typer.Option(False, "--confirm", "-y", help="Confirm deletion"),
 ) -> None:
     """Delete multiple notebooks. IRREVERSIBLE."""
-    from notebooklm_tools.cli.utils import get_client
+    from notebooklm_tools.cli.utils import get_client, handle_error
     from notebooklm_tools.services import batch as batch_service
 
     if not confirm:
@@ -138,7 +138,7 @@ def batch_studio(
     all_notebooks: bool = typer.Option(False, "--all", "-a", help="Generate for ALL notebooks"),
 ) -> None:
     """Generate studio artifacts across multiple notebooks."""
-    from notebooklm_tools.cli.utils import get_client
+    from notebooklm_tools.cli.utils import get_client, handle_error
     from notebooklm_tools.services import batch as batch_service
 
     try:

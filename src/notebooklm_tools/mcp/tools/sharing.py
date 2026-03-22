@@ -20,7 +20,10 @@ def notebook_share_status(notebook_id: str) -> dict[str, Any]:
         result = sharing_service.get_share_status(client, notebook_id)
         return {"status": "success", **result}
     except ServiceError as e:
-        return {"status": "error", "error": e.user_message}
+        err = {"status": "error", "error": e.user_message}
+        if getattr(e, "hint", None):
+            err["hint"] = e.hint
+        return err
     except Exception as e:
         return {"status": "error", "error": str(e)}
 
@@ -43,7 +46,10 @@ def notebook_share_public(
         result = sharing_service.set_public_access(client, notebook_id, is_public)
         return {"status": "success", **result}
     except ServiceError as e:
-        return {"status": "error", "error": e.user_message}
+        err = {"status": "error", "error": e.user_message}
+        if getattr(e, "hint", None):
+            err["hint"] = e.hint
+        return err
     except Exception as e:
         return {"status": "error", "error": str(e)}
 
@@ -68,7 +74,10 @@ def notebook_share_invite(
         result = sharing_service.invite_collaborator(client, notebook_id, email, role)
         return {"status": "success", **result}
     except ServiceError as e:
-        return {"status": "error", "error": e.user_message}
+        err = {"status": "error", "error": e.user_message}
+        if getattr(e, "hint", None):
+            err["hint"] = e.hint
+        return err
     except Exception as e:
         return {"status": "error", "error": str(e)}
 
@@ -100,6 +109,9 @@ def notebook_share_batch(
         result = sharing_service.invite_collaborators_bulk(client, notebook_id, recipients)
         return {"status": "success", **result}
     except ServiceError as e:
-        return {"status": "error", "error": e.user_message}
+        err = {"status": "error", "error": e.user_message}
+        if getattr(e, "hint", None):
+            err["hint"] = e.hint
+        return err
     except Exception as e:
         return {"status": "error", "error": str(e)}

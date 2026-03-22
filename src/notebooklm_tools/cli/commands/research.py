@@ -8,7 +8,7 @@ from rich.progress import Progress, SpinnerColumn, TextColumn
 
 from notebooklm_tools.core.alias import get_alias_manager
 from notebooklm_tools.core.exceptions import NLMError
-from notebooklm_tools.cli.utils import get_client
+from notebooklm_tools.cli.utils import get_client, handle_error
 from notebooklm_tools.services import research as research_service, ServiceError
 
 console = Console()
@@ -92,14 +92,8 @@ def start_research(
         estimate = "~30 seconds" if mode == "fast" else "~5 minutes"
         console.print(f"\n[dim]Estimated time: {estimate}[/dim]")
         console.print(f"[dim]Run 'nlm research status {notebook_id}' to check progress.[/dim]")
-    except ServiceError as e:
-        console.print(f"[red]Error:[/red] {e.user_message}")
-        raise typer.Exit(1)
-    except NLMError as e:
-        console.print(f"[red]Error:[/red] {e.message}")
-        if e.hint:
-            console.print(f"\n[dim]Hint: {e.hint}[/dim]")
-        raise typer.Exit(1)
+    except (ServiceError, NLMError) as e:
+        handle_error(e, json_output=locals().get('json_output', False))
 
 
 @app.command("status")
@@ -163,14 +157,8 @@ def check_status(
         
         _display_research_status(result, compact)
 
-    except ServiceError as e:
-        console.print(f"[red]Error:[/red] {e.user_message}")
-        raise typer.Exit(1)
-    except NLMError as e:
-        console.print(f"[red]Error:[/red] {e.message}")
-        if e.hint:
-            console.print(f"\n[dim]Hint: {e.hint}[/dim]")
-        raise typer.Exit(1)
+    except (ServiceError, NLMError) as e:
+        handle_error(e, json_output=locals().get('json_output', False))
 
 
 def _display_research_status(result: dict, compact: bool) -> None:
@@ -292,11 +280,5 @@ def import_research(
     except ValueError:
         console.print("[red]Error:[/red] Invalid indices. Use comma-separated numbers like: 0,2,5")
         raise typer.Exit(1)
-    except ServiceError as e:
-        console.print(f"[red]Error:[/red] {e.user_message}")
-        raise typer.Exit(1)
-    except NLMError as e:
-        console.print(f"[red]Error:[/red] {e.message}")
-        if e.hint:
-            console.print(f"\n[dim]Hint: {e.hint}[/dim]")
-        raise typer.Exit(1)
+    except (ServiceError, NLMError) as e:
+        handle_error(e, json_output=locals().get('json_output', False))

@@ -32,7 +32,7 @@ def cross_query(
     ),
 ) -> None:
     """Query multiple notebooks and get aggregated answers."""
-    from notebooklm_tools.cli.utils import get_client
+    from notebooklm_tools.cli.utils import get_client, handle_error
     from notebooklm_tools.services import cross_notebook as cross_notebook_service
 
     try:

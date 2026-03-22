@@ -38,6 +38,9 @@ def export_artifact(
         )
         return result
     except ServiceError as e:
-        return {"status": "error", "error": e.user_message}
+        err = {"status": "error", "error": e.user_message}
+        if getattr(e, "hint", None):
+            err["hint"] = e.hint
+        return err
     except Exception as e:
         return {"status": "error", "error": str(e)}

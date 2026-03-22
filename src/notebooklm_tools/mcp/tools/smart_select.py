@@ -63,6 +63,9 @@ def tag(
             return {"status": "error", "error": f"Unknown action: {action}. Use: add, remove, list, select"}
 
     except ServiceError as e:
-        return {"status": "error", "error": e.user_message}
+        err = {"status": "error", "error": e.user_message}
+        if getattr(e, "hint", None):
+            err["hint"] = e.hint
+        return err
     except Exception as e:
         return {"status": "error", "error": str(e)}

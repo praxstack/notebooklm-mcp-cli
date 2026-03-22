@@ -9,7 +9,8 @@ from rich.panel import Panel
 
 from notebooklm_tools.core.alias import get_alias_manager
 from notebooklm_tools.core.exceptions import NLMError
-from notebooklm_tools.cli.utils import get_client
+from notebooklm_tools.cli.utils import get_client, handle_error
+from notebooklm_tools.services import ServiceError
 
 console = Console()
 
@@ -194,18 +195,12 @@ def run_chat_repl(notebook_id: str, profile: str | None = None) -> None:
                     console.print("\n\n[dim]Interrupted. Type /exit to quit.[/dim]\n")
                     continue
                 
-                except NLMError as e:
-                    console.print(f"\n[red]Error:[/red] {e.message}")
-                    if e.hint:
-                        console.print(f"[dim]{e.hint}[/dim]")
-                    console.print()
+                except (ServiceError, NLMError) as e:
+                    handle_error(e, json_output=False)
                     continue
     
-    except NLMError as e:
-        console.print(f"[red]Error:[/red] {e.message}")
-        if e.hint:
-            console.print(f"[dim]{e.hint}[/dim]")
-        raise typer.Exit(1)
+    except (ServiceError, NLMError) as e:
+        handle_error(e, json_output=False)
     
     except KeyboardInterrupt:
         console.print("\n[dim]Goodbye![/dim]")

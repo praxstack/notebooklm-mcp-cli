@@ -18,7 +18,10 @@ def notebook_list(max_results: int = 100) -> dict[str, Any]:
         result = notebooks_service.list_notebooks(client, max_results)
         return {"status": "success", **result}
     except ServiceError as e:
-        return {"status": "error", "error": e.user_message}
+        err = {"status": "error", "error": e.user_message}
+        if getattr(e, "hint", None):
+            err["hint"] = e.hint
+        return err
     except Exception as e:
         return {"status": "error", "error": str(e)}
 
@@ -44,7 +47,10 @@ def notebook_get(notebook_id: str) -> dict[str, Any]:
             "sources": result["sources"],
         }
     except ServiceError as e:
-        return {"status": "error", "error": e.user_message}
+        err = {"status": "error", "error": e.user_message}
+        if getattr(e, "hint", None):
+            err["hint"] = e.hint
+        return err
     except Exception as e:
         return {"status": "error", "error": str(e)}
 
@@ -63,7 +69,10 @@ def notebook_describe(notebook_id: str) -> dict[str, Any]:
         result = notebooks_service.describe_notebook(client, notebook_id)
         return {"status": "success", **result}
     except ServiceError as e:
-        return {"status": "error", "error": e.user_message}
+        err = {"status": "error", "error": e.user_message}
+        if getattr(e, "hint", None):
+            err["hint"] = e.hint
+        return err
     except Exception as e:
         return {"status": "error", "error": str(e)}
 
@@ -89,7 +98,10 @@ def notebook_create(title: str = "") -> dict[str, Any]:
             "message": result["message"],
         }
     except ServiceError as e:
-        return {"status": "error", "error": e.user_message}
+        err = {"status": "error", "error": e.user_message}
+        if getattr(e, "hint", None):
+            err["hint"] = e.hint
+        return err
     except Exception as e:
         return {"status": "error", "error": str(e)}
 
@@ -107,7 +119,10 @@ def notebook_rename(notebook_id: str, new_title: str) -> dict[str, Any]:
         result = notebooks_service.rename_notebook(client, notebook_id, new_title)
         return {"status": "success", **result}
     except ServiceError as e:
-        return {"status": "error", "error": e.user_message}
+        err = {"status": "error", "error": e.user_message}
+        if getattr(e, "hint", None):
+            err["hint"] = e.hint
+        return err
     except Exception as e:
         return {"status": "error", "error": str(e)}
 
@@ -133,6 +148,9 @@ def notebook_delete(notebook_id: str, confirm: bool = False) -> dict[str, Any]:
         result = notebooks_service.delete_notebook(client, notebook_id)
         return {"status": "success", **result}
     except ServiceError as e:
-        return {"status": "error", "error": e.user_message}
+        err = {"status": "error", "error": e.user_message}
+        if getattr(e, "hint", None):
+            err["hint"] = e.hint
+        return err
     except Exception as e:
         return {"status": "error", "error": str(e)}

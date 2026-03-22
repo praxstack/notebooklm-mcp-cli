@@ -13,7 +13,7 @@ from rich.progress import (
     TimeRemainingColumn,
 )
 from notebooklm_tools.core.client import ArtifactNotReadyError
-from notebooklm_tools.cli.utils import get_client, handle_error
+from notebooklm_tools.cli.utils import get_client, handle_error, handle_error
 from notebooklm_tools.core.alias import get_alias_manager
 from notebooklm_tools.services import downloads as downloads_service, ServiceError
 

@@ -8,12 +8,15 @@ For CLI-specific exceptions (with hint messages), see exceptions.py.
 """
 
 
-class NotebookLMError(Exception):
+from .exceptions import NLMError
+
+class NotebookLMError(NLMError):
     """Base exception for NotebookLM errors.
     
     All artifact-related and client-level errors inherit from this class.
     """
-    pass
+    def __init__(self, message: str, hint: str | None = None):
+        super().__init__(message=message, hint=hint)
 
 
 class ArtifactError(NotebookLMError):

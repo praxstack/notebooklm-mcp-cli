@@ -8,7 +8,7 @@ from rich.console import Console
 from notebooklm_tools.core.alias import get_alias_manager
 from notebooklm_tools.core.exceptions import NLMError
 from notebooklm_tools.cli.formatters import detect_output_format, get_formatter
-from notebooklm_tools.cli.utils import get_client
+from notebooklm_tools.cli.utils import get_client, handle_error
 from notebooklm_tools.services import (
     notebooks as notebooks_service,
     chat as chat_service,
@@ -39,14 +39,8 @@ def list_notebooks(
         fmt = detect_output_format(json_output, quiet, title)
         formatter = get_formatter(fmt, console)
         formatter.format_notebooks(notebooks, full=full, title_only=title)
-    except ServiceError as e:
-        console.print(f"[red]Error:[/red] {e.user_message}")
-        raise typer.Exit(1)
-    except NLMError as e:
-        console.print(f"[red]Error:[/red] {e.message}")
-        if e.hint:
-            console.print(f"\n[dim]Hint: {e.hint}[/dim]")
-        raise typer.Exit(1)
+    except (ServiceError, NLMError) as e:
+        handle_error(e, json_output=locals().get('json_output', False))
 
 
 @app.command("create")
@@ -61,14 +55,8 @@ def create_notebook(
         
         console.print(f"[green]✓[/green] {result['message']}")
         console.print(f"  ID: {result['notebook_id']}")
-    except ServiceError as e:
-        console.print(f"[red]Error:[/red] {e.user_message}")
-        raise typer.Exit(1)
-    except NLMError as e:
-        console.print(f"[red]Error:[/red] {e.message}")
-        if e.hint:
-            console.print(f"\n[dim]Hint: {e.hint}[/dim]")
-        raise typer.Exit(1)
+    except (ServiceError, NLMError) as e:
+        handle_error(e, json_output=locals().get('json_output', False))
 
 
 @app.command("get")
@@ -86,14 +74,8 @@ def get_notebook(
         fmt = detect_output_format(json_output)
         formatter = get_formatter(fmt, console)
         formatter.format_item(result, title="Notebook Details")
-    except ServiceError as e:
-        console.print(f"[red]Error:[/red] {e.user_message}")
-        raise typer.Exit(1)
-    except NLMError as e:
-        console.print(f"[red]Error:[/red] {e.message}")
-        if e.hint:
-            console.print(f"\n[dim]Hint: {e.hint}[/dim]")
-        raise typer.Exit(1)
+    except (ServiceError, NLMError) as e:
+        handle_error(e, json_output=locals().get('json_output', False))
 
 
 @app.command("describe")
@@ -111,14 +93,8 @@ def describe_notebook(
         fmt = detect_output_format(json_output)
         formatter = get_formatter(fmt, console)
         formatter.format_item(result, title="Notebook Summary")
-    except ServiceError as e:
-        console.print(f"[red]Error:[/red] {e.user_message}")
-        raise typer.Exit(1)
-    except NLMError as e:
-        console.print(f"[red]Error:[/red] {e.message}")
-        if e.hint:
-            console.print(f"\n[dim]Hint: {e.hint}[/dim]")
-        raise typer.Exit(1)
+    except (ServiceError, NLMError) as e:
+        handle_error(e, json_output=locals().get('json_output', False))
 
 
 @app.command("rename")
@@ -134,14 +110,8 @@ def rename_notebook(
             result = notebooks_service.rename_notebook(client, notebook_id, new_title)
         
         console.print(f"[green]✓[/green] {result['message']}")
-    except ServiceError as e:
-        console.print(f"[red]Error:[/red] {e.user_message}")
-        raise typer.Exit(1)
-    except NLMError as e:
-        console.print(f"[red]Error:[/red] {e.message}")
-        if e.hint:
-            console.print(f"\n[dim]Hint: {e.hint}[/dim]")
-        raise typer.Exit(1)
+    except (ServiceError, NLMError) as e:
+        handle_error(e, json_output=locals().get('json_output', False))
 
 
 @app.command("delete")
@@ -164,14 +134,8 @@ def delete_notebook(
             result = notebooks_service.delete_notebook(client, notebook_id)
         
         console.print(f"[green]✓[/green] {result['message']}")
-    except ServiceError as e:
-        console.print(f"[red]Error:[/red] {e.user_message}")
-        raise typer.Exit(1)
-    except NLMError as e:
-        console.print(f"[red]Error:[/red] {e.message}")
-        if e.hint:
-            console.print(f"\n[dim]Hint: {e.hint}[/dim]")
-        raise typer.Exit(1)
+    except (ServiceError, NLMError) as e:
+        handle_error(e, json_output=locals().get('json_output', False))
 
 
 @app.command("query")
@@ -206,11 +170,5 @@ def query_notebook(
         fmt = detect_output_format(json_output)
         formatter = get_formatter(fmt, console)
         formatter.format_item(result, title="Query Response")
-    except ServiceError as e:
-        console.print(f"[red]Error:[/red] {e.user_message}")
-        raise typer.Exit(1)
-    except NLMError as e:
-        console.print(f"[red]Error:[/red] {e.message}")
-        if e.hint:
-            console.print(f"\n[dim]Hint: {e.hint}[/dim]")
-        raise typer.Exit(1)
+    except (ServiceError, NLMError) as e:
+        handle_error(e, json_output=locals().get('json_output', False))

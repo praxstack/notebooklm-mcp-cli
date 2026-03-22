@@ -51,20 +51,37 @@ def get_client(profile: str | None = None) -> NotebookLMClient:
         console.print("Please run: [bold]nlm login[/bold]")
         raise typer.Exit(1)
 
-def handle_error(e: Exception) -> None:
+def handle_error(e: Exception, json_output: bool = False) -> None:
     """Standard error handler for CLI commands."""
-    from notebooklm_tools.core.client import NotebookLMError
+    from notebooklm_tools.core.exceptions import NLMError
+    from notebooklm_tools.services.errors import ServiceError
+    from notebooklm_tools.cli.formatters import print_json
     
     if isinstance(e, typer.Exit):
         raise e
         
-    if isinstance(e, NotebookLMError):
-        console.print(f"[red]Error:[/red] {str(e)}")
-    else:
-        # Unexpected error
-        console.print(f"[red]Unexpected Error:[/red] {str(e)}")
-        # Only show traceback in debug mode? For now, keep it simple.
+    msg = str(e)
+    hint = getattr(e, "hint", None)
     
+    if isinstance(e, ServiceError):
+        msg = e.user_message
+    elif isinstance(e, NLMError):
+        msg = e.message
+        
+    if json_output:
+        err = {"status": "error", "error": msg}
+        if hint:
+            err["hint"] = hint
+        print_json(err)
+    else:
+        if isinstance(e, (ServiceError, NLMError)):
+            console.print(f"[red]Error:[/red] {msg}")
+            if hint:
+                console.print(f"\n[dim]Hint: {hint}[/dim]")
+        else:
+            # Unexpected error
+            console.print(f"[red]Unexpected Error:[/red] {msg}")
+            
     raise typer.Exit(1)
 
 def extract_cookies_from_string(cookie_str: str) -> dict[str, str]:
