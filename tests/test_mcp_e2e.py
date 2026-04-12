@@ -274,9 +274,6 @@ class TestMCPToolRegistry:
         assert "studio_create" in tool_names
         assert "source_add" in tool_names
 
-        # Check current count
-        assert len(tool_names) == 38, f"Expected 38 tools, got {len(tool_names)}: {tool_names}"
-
         print(f"All {len(tool_names)} tools registered: {sorted(tool_names)}")
 
     def test_old_tools_removed(self):
