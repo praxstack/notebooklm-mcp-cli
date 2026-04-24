@@ -20,7 +20,9 @@ from pydantic import BaseModel, Field
 STORAGE_DIR_NAME = ".notebooklm-mcp-cli"
 
 
-def safe_mkdir(path: Path, *, parents: bool = False, exist_ok: bool = True, mode: int = 0o777) -> None:
+def safe_mkdir(
+    path: Path, *, parents: bool = False, exist_ok: bool = True, mode: int = 0o777
+) -> None:
     """Create a directory, working around Python 3.14 Windows regression.
 
     On Python 3.14 + Windows, ``pathlib.mkdir(parents=True, exist_ok=True)``
