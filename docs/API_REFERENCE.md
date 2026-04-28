@@ -1642,12 +1642,28 @@ GyzE7e([[2], notebook_id, [label_id_to_remove]])
 
 ### `ozz5Z` — Get User Subscription Tier
 
-Returns the user's current NotebookLM subscription tier. Fires on notebook page load.
+Returns the user's current NotebookLM subscription tier. Fires on the homepage (`source-path=/`) during page load.
 
+**Captured request params (2026-04-27, `source-path=/`):**
 ```python
-# Request params — fires automatically with session context (no explicit params needed)
-# Response (decoded) contains:
-"NOTEBOOKLM_TIER_PRO_DASHER_END_USER"  # Example for Google Workspace Pro user
+# Inner JSON params sent to the RPC:
+[[[[null, "1", 627], [null,null,null,null,null,null,null,null,null,[null,null,2]], 1]]]
+
+# 627 and "1" appear to be hardcoded NotebookLM product/SKU constants.
+# The same values appear in the support URL: ?ms=pt:1613;s:627
+# path used: source-path=/ (homepage, no notebook context needed)
+```
+
+**Captured response (decoded, 2026-04-27):**
+```python
+# Tier string is at response[0][0][1][0][1][...]["NOTEBOOKLM_TIER_PRO_DASHER_END_USER"]
+# Full decoded structure (abbreviated):
+[[[[null,"1",627],[[1613,[..., "NOTEBOOKLM_TIER_PRO_DASHER_END_USER", ...]], 0]]]]
+
+# Also contains:
+# - "Manage subscription" link
+# - Support URL: https://support.google.com/notebooklm/answer/16213268?ms=pt:1613;s:627;vp:9
+# - Encoded tokens (session context): "CM0MEO4KICso..." and "CAI="
 ```
 
 **Known tier strings:**
@@ -1659,8 +1675,29 @@ Returns the user's current NotebookLM subscription tier. Fires on notebook page 
 | `NOTEBOOKLM_TIER_PRO_DASHER_END_USER` | Google Workspace Pro user |
 | `NOTEBOOKLM_TIER_ULTRA` | Google AI Ultra |
 
-The response also contains a link to the limits support page:
-`https://support.google.com/notebooklm/answer/16213268`
+**Implementation note:** This RPC is dual-mapped in `core/utils.py` as `add_source_v2`. When called
+with the homepage params above it returns tier info. When called in a notebook context with different
+params it handles the newer source-add flow. Use `source-path=/` and the params above for tier detection.
+
+### `ZwVcOc` — Settings (also fires on homepage)
+
+Also fires on every page load. Returns app settings including what appear to be account-level limits.
+
+**Captured request params (2026-04-27):**
+```python
+[null, [1, null, null, null, null, null, null, null, null, null, [1]]]
+```
+
+**Captured response (decoded, 2026-04-27):**
+```python
+[[null, [6, 500, 300, 500000, 2], [true, null, null, true, ["en", ...], ...], [[1]], [true, 2, 3, 2]]]
+
+# [6, 500, 300, 500000, 2] — second element — suspected to be account limits:
+#   500 = max notebooks (matches Pro tier: 500/user)
+#   300 = max sources per notebook (matches Pro tier: 300/notebook)
+#   6, 500000, 2 — unknown; could be tier code, storage, or other config
+# Not confirmed — needs testing against Standard/Plus/Ultra accounts to validate.
+```
 
 ### Usage Limits by Tier (from official docs, subject to change)
 
