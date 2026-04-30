@@ -58,7 +58,16 @@ def label(
         label(notebook_id="abc", action="move_source", label_id="xyz", source_id="src-id")
         label(notebook_id="abc", action="delete", label_id="xyz", confirm=True)
     """
-    valid_actions = ("auto", "list", "reorganize", "create", "rename", "set_emoji", "move_source", "delete")
+    valid_actions = (
+        "auto",
+        "list",
+        "reorganize",
+        "create",
+        "rename",
+        "set_emoji",
+        "move_source",
+        "delete",
+    )
 
     if action not in valid_actions:
         return {
