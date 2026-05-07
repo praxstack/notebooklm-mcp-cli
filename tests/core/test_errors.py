@@ -1,6 +1,8 @@
 # tests/core/test_errors.py
 """Tests for artifact exception classes."""
 
+import pytest
+
 from notebooklm_tools.core.errors import (
     ArtifactDownloadError,
     ArtifactError,
@@ -9,8 +11,8 @@ from notebooklm_tools.core.errors import (
     ArtifactParseError,
     ClientAuthenticationError,
     NotebookLMError,
-    RPCError,
     ResourceExhaustedError,
+    RPCError,
 )
 
 

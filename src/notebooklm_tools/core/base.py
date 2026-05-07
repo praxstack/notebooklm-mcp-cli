@@ -60,6 +60,7 @@ def _extract_user_message(detail_data: Any, _depth: int = 0) -> str:
         return "; ".join(parts)
     return ""
 
+
 # Timeout configuration (seconds)
 DEFAULT_TIMEOUT = 30.0  # Default for most operations
 SOURCE_ADD_TIMEOUT = 120.0  # Extended timeout for all source operations

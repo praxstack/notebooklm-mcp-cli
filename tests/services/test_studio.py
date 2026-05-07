@@ -5,7 +5,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from notebooklm_tools.core.errors import RPCError, ResourceExhaustedError
+from notebooklm_tools.core.errors import ResourceExhaustedError, RPCError
 from notebooklm_tools.services.errors import ServiceError, ValidationError
 from notebooklm_tools.services.studio import (
     VALID_ARTIFACT_TYPES,

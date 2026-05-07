@@ -1,6 +1,7 @@
 # tests/core/test_base.py
 """Tests for BaseClient infrastructure class."""
 
+from typing import Any
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -227,7 +228,7 @@ def test_constants_available():
 def test_extract_rpc_result_raises_resource_exhausted_on_code_8():
     """Code 8 with UserDisplayableError should raise ResourceExhaustedError."""
     from notebooklm_tools.core.base import BaseClient
-    from notebooklm_tools.core.errors import RPCError, ResourceExhaustedError
+    from notebooklm_tools.core.errors import ResourceExhaustedError, RPCError
 
     with patch.object(BaseClient, "_refresh_auth_tokens"):
         client = BaseClient(cookies={}, csrf_token="token")
