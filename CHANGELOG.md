@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.6.8] - 2026-05-11
+
+### Fixed
+
+- **Conversation Query Rejection** — Fixed an issue where the notebook query endpoint would reject requests with an opaque error due to strict backend requirements. Explicitly added `Content-Type: application/x-www-form-urlencoded;charset=UTF-8` to the streamed query endpoint. Thanks to **@fabianafurtadoff** for the contribution (PR #189)!
+
 ## [0.6.7] - 2026-05-10
 
 ### Added
