@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Fixed
+
+- **`nlm login` crash on fully expired auth (PR #211 / Issue #210)** — When the stored Google session/cookies were fully expired, `_validate_saved_profile()` raised `ClientAuthenticationError`, which does **not** inherit from `NLMError`. The `except NLMError:` clause in `login_callback` missed it, so the exception bubbled up to `cli_main()` and exited the process before ever launching Chrome for interactive sign-in. Users had to manually delete all profiles as a workaround. Fixed by also catching `ClientAuthenticationError` in the validation catch. Thanks to **@insane66613** for the fix!
+- **MCP silent auth/studio failures (PR #212)** — Three related silent-failure bugs in the MCP server under stale/expired auth:
+    1. `refresh_auth()` returned `status: "success"` after reloading dead tokens from disk. A disk reload is not a successful re-auth — now runs `check_auth(live=True)` after the reload and returns `status: "expired"` with an actionable `nlm login` hint if tokens are dead.
+    2. `studio_create()` had no pre-flight auth check, so it returned `status: "success"` with an `artifact_id` that failed seconds later — sending agents into pointless polling loops. Now runs `check_auth(live=True)` after the network-free confirmation preview and artifact-type validation; invalid auth returns `status: "error"` with an `nlm login` hint before any doomed request is fired.
+    3. `studio_status()` surfaced `status: "failed"` artifacts with every other field `null` and no reason, so callers had no way to know why. The raw gRPC payload carries no error string, so `get_studio_status()` now synthesizes a non-null `error_reason` for failed artifacts while preferring any real `error_reason` / `failure_reason` / `failure_code` / `error` key if a future API version exposes one. 11 new tests cover the full matrix. Thanks to **@idankatz64-commits** for the comprehensive PR and tests!
+    - The pre-flight `check_auth(live=True)` adds ~1 homepage fetch on the `confirm=True` path of `studio_create` and on every `refresh_auth`. A network-free preview path is preserved for `confirm=False`.
+
+### Changed
+
+- **`ArtifactInfo` gains an optional `error_reason` field** — Returned by the MCP `studio_status` tool. `None` for healthy artifacts; a synthesized string for failed artifacts (with a hint to re-check auth); verbatim from the API if a real `error_reason`/`failure_reason`/`failure_code`/`error` key is present. Backward-compatible: existing callers that only inspect `status` are unaffected.
+
 ## [0.6.13] - 2026-05-27
 
 ### Security

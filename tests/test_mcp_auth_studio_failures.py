@@ -66,6 +66,34 @@ def test_refresh_auth_does_not_claim_success_when_tokens_are_expired(monkeypatch
     assert "nlm login" in blob, f"Expected actionable 'nlm login' guidance, got: {result}"
 
 
+def test_refresh_auth_returns_helpful_error_when_env_var_set(monkeypatch):
+    """When NOTEBOOKLM_COOKIES is set (e.g. via claude_desktop_config.json), the env var
+    overrides all disk-based auth. A disk reload won't help — surface a clear, actionable
+    error pointing at the MCP config file instead of lying with 'success'.
+    """
+    monkeypatch.setenv("NOTEBOOKLM_COOKIES", "SID=fake; HSID=fake; SSID=fake")
+
+    # If the code wrongly proceeds, make the disk path explode so the test can't pass by luck.
+    def _boom_load():
+        raise AssertionError("refresh_auth should not touch disk tokens when env var is set")
+
+    monkeypatch.setattr(core_auth, "load_cached_tokens", _boom_load, raising=True)
+    monkeypatch.setattr(
+        auth_tools,
+        "get_client",
+        lambda: (_ for _ in ()).throw(AssertionError("should not call get_client")),
+        raising=True,
+    )
+
+    result = auth_tools.refresh_auth()
+
+    assert result.get("status") == "error", f"Expected error when env var set, got: {result}"
+    blob = str(result.get("error", "")).lower()
+    assert "notebooklm_cookies" in blob or "mcp config" in blob, (
+        f"Error should point the user at the env var / MCP config, got: {result}"
+    )
+
+
 def test_refresh_auth_reports_success_when_tokens_are_valid(monkeypatch):
     """The happy path must still work: valid tokens on disk → success."""
     monkeypatch.setattr(auth_tools, "get_client", lambda: _FakeClient(), raising=True)

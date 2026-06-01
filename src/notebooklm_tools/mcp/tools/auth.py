@@ -41,13 +41,10 @@ def refresh_auth() -> ResultDict:
 
         cached = load_cached_tokens()
         if cached:
-            # Reset client to force re-initialization with fresh tokens
-            reset_client()
-            get_client()  # This will use the cached tokens
-
-            # Honesty check: reloading tokens from disk is NOT a successful
+            # Honesty check FIRST: reloading tokens from disk is NOT a successful
             # re-auth if those tokens are already dead. Validate live before
-            # claiming success, otherwise agents loop on doomed studio calls.
+            # creating any client, otherwise agents loop on doomed studio calls
+            # (and we leave a client object initialized with bad tokens behind).
             from notebooklm_tools.core.auth import check_auth
 
             check = check_auth(live=True)
@@ -59,6 +56,9 @@ def refresh_auth() -> ResultDict:
                     status="expired",
                     reason=check.reason,
                 )
+            # Tokens are valid — reset and re-initialize the client.
+            reset_client()
+            get_client()
             return {
                 "status": "success",
                 "message": "Auth tokens reloaded from disk cache and validated.",
