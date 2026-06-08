@@ -11,11 +11,19 @@ from urllib.parse import quote, urlparse
 
 from ...services import ServiceError, ValidationError
 from ...services import sources as sources_service
-from ._utils import ResultDict, coerce_list, error_result, get_client, get_mcp_base_url, logged_tool, PUBLIC_DIR
+from ._utils import (
+    PUBLIC_DIR,
+    ResultDict,
+    coerce_list,
+    error_result,
+    get_client,
+    get_mcp_base_url,
+    logged_tool,
+)
 
-
-
-CHATGPT_FILE_MAX_BYTES = int(os.environ.get("NOTEBOOKLM_CHATGPT_FILE_MAX_BYTES", str(25 * 1024 * 1024)))
+CHATGPT_FILE_MAX_BYTES = int(
+    os.environ.get("NOTEBOOKLM_CHATGPT_FILE_MAX_BYTES", str(25 * 1024 * 1024))
+)
 CHATGPT_FILE_CACHE_DIR = Path(
     os.environ.get("NOTEBOOKLM_CHATGPT_FILE_CACHE_DIR", "")
     or Path(tempfile.gettempdir()) / "notebooklm-chatgpt-files"
@@ -54,7 +62,9 @@ def _coerce_chatgpt_file_reference(file: dict[str, object] | str | None) -> dict
     if isinstance(file, str):
         raw = file.strip()
         if not raw:
-            raise ValidationError("file must be a resolved ChatGPT file object, not an empty string.")
+            raise ValidationError(
+                "file must be a resolved ChatGPT file object, not an empty string."
+            )
         try:
             parsed = json.loads(raw)
         except json.JSONDecodeError as exc:
@@ -469,7 +479,11 @@ def source_get_content(
             except ServiceError as e:
                 last_error = e
                 message = f"{e.user_message} {e}"
-                if not wait or not _source_content_transient(message) or time.monotonic() >= deadline:
+                if (
+                    not wait
+                    or not _source_content_transient(message)
+                    or time.monotonic() >= deadline
+                ):
                     raise
             if not wait or time.monotonic() >= deadline:
                 if last_error:
@@ -493,7 +507,10 @@ def source_get_content(
             PUBLIC_DIR.mkdir(parents=True, exist_ok=True)
             pub_path = PUBLIC_DIR / safe_title
             if pub_path.exists():
-                pub_path = PUBLIC_DIR / f"{Path(safe_title).stem}-{os.urandom(2).hex()}{Path(safe_title).suffix}"
+                pub_path = (
+                    PUBLIC_DIR
+                    / f"{Path(safe_title).stem}-{os.urandom(2).hex()}{Path(safe_title).suffix}"
+                )
 
             pub_path.write_text(content, encoding="utf-8")
 
@@ -502,7 +519,10 @@ def source_get_content(
                 result["download_url"] = f"{base_url}/artifacts/{quote(pub_path.name)}"
         except Exception as e:
             import logging
-            logging.getLogger("notebooklm_tools.mcp").warning(f"Failed to copy public source file: {e}")
+
+            logging.getLogger("notebooklm_tools.mcp").warning(
+                f"Failed to copy public source file: {e}"
+            )
 
         return {"status": "success", **result}
 

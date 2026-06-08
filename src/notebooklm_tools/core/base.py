@@ -18,19 +18,9 @@ import urllib.parse
 from collections import OrderedDict
 from typing import Any
 
-# Sanitize no_proxy / NO_PROXY environment variables to prevent httpx crashes on Windows
-# when they contain colons (e.g. ::1 for IPv6 loopback) - see:
-# https://github.com/encode/httpx/issues/3103 or similar
-for _var in ("no_proxy", "NO_PROXY"):
-    _val = os.environ.get(_var)
-    if _val:
-        _parts = [p.strip() for p in _val.split(",")]
-        _clean_parts = [p for p in _parts if ":" not in p]
-        if len(_clean_parts) != len(_parts):
-            os.environ[_var] = ",".join(_clean_parts)
-
 import httpx
 
+import notebooklm_tools.utils.env_sanitize as _env_sanitize  # noqa: F401
 from notebooklm_tools.utils.config import get_base_url
 
 from . import constants

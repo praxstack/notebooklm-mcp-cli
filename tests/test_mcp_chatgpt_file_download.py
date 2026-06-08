@@ -1,12 +1,10 @@
 """Tests for ChatGPT file download support for artifacts and sources."""
 
-import os
-import shutil
 from pathlib import Path
-from urllib.parse import unquote
 from unittest.mock import MagicMock, patch
+from urllib.parse import unquote
 
-from notebooklm_tools.mcp.tools import _utils, sources, downloads
+from notebooklm_tools.mcp.tools import _utils, downloads, sources
 
 
 def test_source_get_content_appends_download_url(tmp_path):
@@ -23,7 +21,10 @@ def test_source_get_content_appends_download_url(tmp_path):
 
     with (
         patch("notebooklm_tools.mcp.tools.sources.get_client", return_value=mock_client),
-        patch("notebooklm_tools.mcp.tools.sources.sources_service.get_source_content", return_value=mock_content),
+        patch(
+            "notebooklm_tools.mcp.tools.sources.sources_service.get_source_content",
+            return_value=mock_content,
+        ),
         patch("notebooklm_tools.mcp.tools.sources.PUBLIC_DIR", PUBLIC_DIR),
     ):
         # 1. Test without base_url set
@@ -68,19 +69,26 @@ def test_download_artifact_appends_download_url(tmp_path):
 
     with (
         patch("notebooklm_tools.mcp.tools.downloads.get_client", return_value=mock_client),
-        patch("notebooklm_tools.mcp.tools.downloads.downloads_service.download_async", return_value=mock_download_result),
+        patch(
+            "notebooklm_tools.mcp.tools.downloads.downloads_service.download_async",
+            return_value=mock_download_result,
+        ),
         patch("notebooklm_tools.mcp.tools.downloads.PUBLIC_DIR", PUBLIC_DIR),
     ):
         # 1. Test without base_url set
         _utils.mcp_base_url.set("")
-        res1 = downloads.download_artifact(notebook_id="nb_123", artifact_type="audio", output_path="artifact.mp3")
+        res1 = downloads.download_artifact(
+            notebook_id="nb_123", artifact_type="audio", output_path="artifact.mp3"
+        )
         assert res1["status"] == "success"
         assert "download_url" not in res1
 
         # 2. Test with base_url set
         token = _utils.mcp_base_url.set("https://tunnel.example")
         try:
-            res2 = downloads.download_artifact(notebook_id="nb_123", artifact_type="audio", output_path="artifact.mp3")
+            res2 = downloads.download_artifact(
+                notebook_id="nb_123", artifact_type="audio", output_path="artifact.mp3"
+            )
             assert res2["status"] == "success"
             assert "download_url" in res2
             assert res2["download_url"] == "https://tunnel.example/artifacts/artifact.mp3"
@@ -106,7 +114,10 @@ def test_source_get_content_url_encodes_download_url(tmp_path):
 
     with (
         patch("notebooklm_tools.mcp.tools.sources.get_client", return_value=mock_client),
-        patch("notebooklm_tools.mcp.tools.sources.sources_service.get_source_content", return_value=mock_content),
+        patch(
+            "notebooklm_tools.mcp.tools.sources.sources_service.get_source_content",
+            return_value=mock_content,
+        ),
         patch("notebooklm_tools.mcp.tools.sources.PUBLIC_DIR", public_dir),
     ):
         token = _utils.mcp_base_url.set("https://tunnel.example")

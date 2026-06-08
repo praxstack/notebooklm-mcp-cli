@@ -6,7 +6,7 @@ from urllib.parse import quote
 
 from ...services import ServiceError, ValidationError
 from ...services import downloads as downloads_service
-from ._utils import ResultDict, error_result, get_client, get_mcp_base_url, logged_tool, PUBLIC_DIR
+from ._utils import PUBLIC_DIR, ResultDict, error_result, get_client, get_mcp_base_url, logged_tool
 
 
 def _download_transient(message: str) -> bool:
@@ -101,6 +101,7 @@ def download_artifact(
         try:
             import shutil
             from pathlib import Path
+
             PUBLIC_DIR.mkdir(parents=True, exist_ok=True)
             pub_path = PUBLIC_DIR / Path(saved_path).name
             shutil.copy2(saved_path, pub_path)
@@ -110,11 +111,14 @@ def download_artifact(
                 return {
                     "status": "success",
                     **download_result,
-                    "download_url": f"{base_url}/artifacts/{quote(pub_path.name)}"
+                    "download_url": f"{base_url}/artifacts/{quote(pub_path.name)}",
                 }
         except Exception as e:
             import logging
-            logging.getLogger("notebooklm_tools.mcp").warning(f"Failed to copy public artifact: {e}")
+
+            logging.getLogger("notebooklm_tools.mcp").warning(
+                f"Failed to copy public artifact: {e}"
+            )
 
         return {"status": "success", **download_result}
 

@@ -1,7 +1,7 @@
 """Tests for ChatGPT file parameter upload support."""
 
 from pathlib import Path
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 
 def test_source_add_chatgpt_file_is_registered_with_file_param_meta():

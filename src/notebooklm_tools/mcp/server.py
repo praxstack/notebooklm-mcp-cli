@@ -20,12 +20,17 @@ Tool Modules:
 import argparse
 import logging
 import os
+from pathlib import Path
 
 from fastmcp import FastMCP
+from starlette.middleware import Middleware
+from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
-from starlette.responses import JSONResponse, Response, FileResponse
+from starlette.responses import FileResponse, JSONResponse, Response
 
 from notebooklm_tools import __version__
+
+from .tools._utils import PUBLIC_DIR, reset_mcp_base_url, set_mcp_base_url
 
 _FALSY = frozenset({"false", "0", "no", "off"})
 
@@ -73,14 +78,11 @@ async def health_check(request: Request) -> JSONResponse:
     )
 
 
-from pathlib import Path
-from starlette.middleware import Middleware
-from starlette.middleware.base import BaseHTTPMiddleware
-from .tools._utils import PUBLIC_DIR, reset_mcp_base_url, set_mcp_base_url
-
 class BaseUrlMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
-        host = request.headers.get("x-forwarded-host", request.headers.get("host", "127.0.0.1:8000"))
+        host = request.headers.get(
+            "x-forwarded-host", request.headers.get("host", "127.0.0.1:8000")
+        )
         proto = request.headers.get("x-forwarded-proto", "http")
         base_url = f"{proto}://{host}"
 
@@ -89,6 +91,7 @@ class BaseUrlMiddleware(BaseHTTPMiddleware):
             return await call_next(request)
         finally:
             reset_mcp_base_url(token)
+
 
 # Ensure FastMCP applies the HTTP middleware to the actual served Starlette app.
 _original_http_app = mcp.http_app
@@ -101,6 +104,7 @@ def _http_app_with_base_url(*args, middleware=None, **kwargs):
 
 mcp.http_app = _http_app_with_base_url
 
+
 # Custom route to serve public artifacts
 @mcp.custom_route("/artifacts/{filename}", methods=["GET"])
 async def get_public_artifact(request: Request) -> Response:
@@ -112,7 +116,6 @@ async def get_public_artifact(request: Request) -> Response:
     if not filepath.exists() or not filepath.is_file():
         return Response("File not found", status_code=404)
     return FileResponse(str(filepath))
-
 
 
 def _register_tools() -> None:
