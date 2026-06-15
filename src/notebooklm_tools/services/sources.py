@@ -1,11 +1,14 @@
 """Sources service — shared validation and logic for source management."""
 
 import urllib.parse
+from concurrent.futures import ThreadPoolExecutor
 from typing import Any
 
 from ..core.client import NotebookLMClient
 from ._compat import TypedDict
 from .errors import ServiceError, ValidationError
+
+_FRESHNESS_MAX_WORKERS = 8
 
 VALID_SOURCE_TYPES = ("url", "text", "drive", "file")
 VALID_DRIVE_DOC_TYPES = ("doc", "slides", "sheets", "pdf")
@@ -388,6 +391,16 @@ def list_drive_sources(
     drive_sources: list[DriveSourceInfo] = []
     other_sources: list[dict[str, object | None]] = []
 
+    syncable_ids = [s["id"] for s in sources if s.get("can_sync") and isinstance(s.get("id"), str)]
+    freshness_map: dict[str, bool | None] = {}
+    if syncable_ids:
+        with ThreadPoolExecutor(max_workers=_FRESHNESS_MAX_WORKERS) as ex:
+            for source_id, is_fresh in ex.map(
+                lambda sid: (sid, _safe_check_freshness(client, sid)),
+                syncable_ids,
+            ):
+                freshness_map[source_id] = is_fresh
+
     for source in sources:
         source_info: dict[str, object | None] = {
             "id": source.get("id"),
@@ -396,7 +409,7 @@ def list_drive_sources(
         }
 
         if source.get("can_sync"):
-            is_fresh = client.check_source_freshness(source["id"])
+            is_fresh = freshness_map.get(source["id"]) if isinstance(source.get("id"), str) else None
             source_id = source.get("id")
             source_title = source.get("title")
             source_type_name = source.get("source_type_name")
@@ -417,6 +430,18 @@ def list_drive_sources(
         "drive_count": len(drive_sources),
         "stale_count": sum(1 for s in drive_sources if s.get("stale")),
     }
+
+
+def _safe_check_freshness(client: NotebookLMClient, source_id: str) -> bool | None:
+    """Return freshness, or None on any error.
+
+    Used by the parallel freshness fan-out in list_drive_sources: one source
+    failing its freshness check must not sink the whole call.
+    """
+    try:
+        return client.check_source_freshness(source_id)
+    except Exception:
+        return None
 
 
 def sync_drive_sources(
