@@ -1,6 +1,6 @@
 # MCP Guide
 
-Complete reference for the NotebookLM MCP server — **35 tools** for AI assistants.
+Complete reference for the NotebookLM MCP server — **39 tools** for AI assistants.
 
 ## Installation
 
@@ -322,7 +322,7 @@ pipeline(action="run", notebook_id="abc", pipeline_name="ingest-and-podcast", in
 
 ## Context Window Tips
 
-This MCP has **35 tools** which consume context. Best practices:
+This MCP has **39 tools** which consume context. Best practices:
 
 - **Disable when not using**: In Claude Code, use `@notebooklm-mcp` to toggle
 - **Use unified tools**: `source_add`, `studio_create`, `download_artifact` handle multiple operations each

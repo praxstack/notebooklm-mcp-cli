@@ -174,10 +174,10 @@ nlm share invite <notebook> email --role editor  # Invite editor
 nlm batch query "What are the key takeaways?" --notebooks "id1,id2"
 nlm batch query "Summarize" --tags "ai,research"          # Query by tag
 nlm batch query "Summarize" --all                         # Query ALL notebooks
-nlm batch add-source --url "https://..." --notebooks "id1,id2"
+nlm batch add-source "https://..." --notebooks "id1,id2"
 nlm batch create "Project A, Project B, Project C"        # Create multiple
 nlm batch delete --notebooks "id1,id2" --confirm          # Delete multiple
-nlm batch studio --type audio --tags "research" --confirm # Generate across notebooks
+nlm batch studio audio --tags "research"                  # Generate across notebooks
 ```
 
 ### Cross-Notebook Query
@@ -192,9 +192,9 @@ nlm cross query "Summarize everything" --all              # Query ALL notebooks
 
 ```bash
 nlm pipeline list                                         # List available pipelines
-nlm pipeline run <notebook> ingest-and-podcast --url "https://..."
-nlm pipeline run <notebook> research-and-report --url "https://..."
-nlm pipeline run <notebook> multi-format                  # Audio + report + flashcards
+nlm pipeline run ingest-and-podcast --notebook <id> --input-url "https://..."
+nlm pipeline run research-and-report --notebook <id> --input-url "https://..."
+nlm pipeline run multi-format --notebook <id>             # Audio + report + flashcards
 ```
 
 **Built-in pipelines:** `ingest-and-podcast`, `research-and-report`, `multi-format`
@@ -368,7 +368,7 @@ nlm download audio ai <artifact-id> --output podcast.mp3
 
 ## Tips
 
-- Session lasts ~20 minutes; run `nlm login` if operations fail
+- Saved cookies often remain usable for weeks. Run `nlm login` for confirmed stale or missing credentials.
 - Use `--confirm` for all create/delete commands in scripts
 - Use `--wait` when adding sources to ensure they're ready before querying
 - Use aliases for frequently-used notebooks
